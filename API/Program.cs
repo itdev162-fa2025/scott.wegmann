@@ -31,5 +31,22 @@ app.UseCors(policy => policy
 );
 
 app.MapControllers();
+
+// Seed data
+using(var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<DataContext>();
+        context.Database.Migrate();
+        Seed.seedData(context);
+    }
+    catch (System.Exception e)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(e, "An error occurred while seeding database");
+    }
+}
 app.Run();
 
